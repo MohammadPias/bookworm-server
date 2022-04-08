@@ -45,21 +45,21 @@ async function run() {
         app.get('/books/:id', async (req, res) => {
             const id = req.params.id;
             const idDigit = id.toString().length;
-            const query = { _id: ObjectId(id) };
-            const result = await bookCollection.findOne(query);
+            let books = [];
 
-            /* if (idDigit > 100) {
+            if (idDigit > 100) {
+                const query = { _id: ObjectId(id) };
+                const result = await bookCollection.findOne(query);
             }
             else {
 
                 const query = { category: id }
                 const cursor = bookCollection.find(query);
-                const bookArray = await cursor.toArray();
-                console.log('hitting the get method by category', bookArray)
-                res.json(bookArray)
-            } */
+                books = await cursor.toArray();
+                console.log('hitting the get method by category', books)
+            }
 
-            res.json(result)
+            res.json(books)
         });
         // get books by category
         // app.get('/books/:id')

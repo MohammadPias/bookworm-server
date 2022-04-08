@@ -1,6 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const { MongoClient, ServerApiVersion } = require('mongodb');
+const ObjectId = require('mongodb').ObjectId;
 require('dotenv').config()
 
 const port = '5000';
@@ -17,14 +18,51 @@ async function run() {
         await client.connect();
 
         const database = client.db("bookworm");
-        const userCollection = database.collection('user')
+        const userCollection = database.collection('user');
+        const bookCollection = database.collection('books')
 
         // add user to database
         app.post('/user', async (req, res) => {
             const data = req.body;
-            const result = userCollection.insertOne(data)
+            const result = await userCollection.insertOne(data)
             res.json(result);
-        })
+        });
+        // add books to db
+        app.post('/books', async (req, res) => {
+            const book = req.body;
+            const result = await bookCollection.insertOne(book);
+            console.log(result)
+            res.json(result);
+        });
+        // get all books
+        app.get('/books', async (req, res) => {
+            const cursor = bookCollection.find({});
+            const result = await cursor.toArray();
+
+            res.send(result)
+        });
+        // get books by id
+        app.get('/books/:id', async (req, res) => {
+            const id = req.params.id;
+            const idDigit = id.toString().length;
+            const query = { _id: ObjectId(id) };
+            const result = await bookCollection.findOne(query);
+
+            /* if (idDigit > 100) {
+            }
+            else {
+
+                const query = { category: id }
+                const cursor = bookCollection.find(query);
+                const bookArray = await cursor.toArray();
+                console.log('hitting the get method by category', bookArray)
+                res.json(bookArray)
+            } */
+
+            res.json(result)
+        });
+        // get books by category
+        // app.get('/books/:id')
     }
     finally {
         // await client.close();
@@ -37,4 +75,5 @@ app.get('/', (req, res) => {
 });
 app.listen(port, () => {
     console.log('listening port', port)
-})
+});
+

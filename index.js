@@ -31,7 +31,6 @@ async function run() {
         app.post('/books', async (req, res) => {
             const book = req.body;
             const result = await bookCollection.insertOne(book);
-            console.log(result)
             res.json(result);
         });
         // get all books
@@ -45,24 +44,39 @@ async function run() {
         app.get('/books/:id', async (req, res) => {
             const id = req.params.id;
             const idDigit = id.toString().length;
+            console.log(idDigit)
             let books = [];
-
-            if (idDigit > 100) {
+            if (idDigit > 5) {
                 const query = { _id: ObjectId(id) };
-                const result = await bookCollection.findOne(query);
+                books = await bookCollection.findOne(query);
             }
             else {
 
                 const query = { category: id }
                 const cursor = bookCollection.find(query);
                 books = await cursor.toArray();
-                console.log('hitting the get method by category', books)
             }
 
             res.json(books)
         });
-        // get books by category
-        // app.get('/books/:id')
+
+        // get books by cart
+        app.post('/books/keys', async (req, res) => {
+            const keys = req.body;
+            console.log(keys)
+
+            const objArray = [];
+            for (const key of keys) {
+                objArray.push(ObjectId(key))
+            }
+            console.log(objArray)
+
+            const query = { _id: { $in: objArray } };
+            const result = await bookCollection.find(query).toArray();
+            console.log(result)
+            res.json(result)
+
+        })
     }
     finally {
         // await client.close();

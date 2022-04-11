@@ -19,7 +19,8 @@ async function run() {
 
         const database = client.db("bookworm");
         const userCollection = database.collection('user');
-        const bookCollection = database.collection('books')
+        const bookCollection = database.collection('books');
+        const orderCollection = database.collection('orders');
 
         // add user to database
         app.post('/user', async (req, res) => {
@@ -66,8 +67,10 @@ async function run() {
             console.log(keys)
 
             const objArray = [];
-            for (const key of keys) {
-                objArray.push(ObjectId(key))
+            if (keys.length) {
+                for (const key of keys) {
+                    objArray.push(ObjectId(key))
+                }
             }
             console.log(objArray)
 
@@ -76,6 +79,25 @@ async function run() {
             console.log(result)
             res.json(result)
 
+        });
+
+        // add orders to db
+        app.post('/orders', async (req, res) => {
+            const orders = req.body;
+            const result = await orderCollection.insertOne(orders);
+            res.send(result)
+        });
+
+        // find orders by email
+        app.get('/orders/:id', async (req, res) => {
+            const email = req.params.id;
+            console.log('hitting the post', email)
+            const query = { email: email };
+            const cursor = orderCollection.find(query);
+            console.log(cursor)
+            const result = await cursor.toArray();
+            console.log(email, result);
+            res.json(result);
         })
     }
     finally {
